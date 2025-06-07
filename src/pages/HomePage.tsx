@@ -132,7 +132,7 @@ const HomePage = () => {
           </form>
 
           <div>
-            <h2 className="text-2xl font-bold mb-6">Created With Lovart</h2>
+            <h2 className="text-2xl font-bold mb-6">Created With Chat Studio</h2>
             <div className="flex overflow-x-auto pb-6 space-x-6">
               {projects.map((project) => (
                 <Link
