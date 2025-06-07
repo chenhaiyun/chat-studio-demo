@@ -177,32 +177,38 @@ const StudioPage = () => {
       {/* Main content area - adjusted to account for fixed chat sidebar */}
       <div className="flex-1 ml-16 flex">
         {/* Generated content display area - width adjusted to account for fixed chat sidebar */}
-        <div className="w-2/3 pr-[33.33%] bg-gray-200 p-4 flex flex-col">
-          <div className="flex-1 overflow-y-auto">
-            <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="w-2/3 bg-gray-200 flex flex-col">
+          <div className="flex-1 overflow-y-auto p-2">
+            <div className="grid grid-cols-4 gap-2">
               {generatedContent.map((content) => (
                 <div
                   key={content.id}
-                  className={`cursor-pointer rounded-lg overflow-hidden ${
+                  className={`cursor-pointer rounded-lg overflow-hidden shadow-lg ${
                     selectedContent === content.id
                       ? "ring-4 ring-blue-500"
                       : ""
                   }`}
                   onClick={() => setSelectedContent(content.id)}
                 >
-                  <div className="w-full h-32">
+                  <div className="w-full h-48 relative">
                     {content.type === "image" ? (
-                      <PlaceholderDiv 
-                        color={content.color} 
-                        title={content.title}
-                        width={content.dimensions.width}
-                        height={content.dimensions.height}
-                      />
+                      <div className="w-full h-full">
+                        <PlaceholderDiv 
+                          color={content.color} 
+                          title={content.title}
+                          width={content.dimensions.width}
+                          height={content.dimensions.height}
+                        />
+                        {/* Title overlay at bottom */}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                          <h3 className="text-white font-medium">{content.title}</h3>
+                        </div>
+                      </div>
                     ) : (
-                      <div className="w-full h-full bg-black flex flex-col items-center justify-center text-white">
+                      <div className="w-full h-full bg-black flex flex-col items-center justify-center text-white relative">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
-                          className="h-8 w-8 mb-2"
+                          className="h-12 w-12 mb-3"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -220,8 +226,13 @@ const StudioPage = () => {
                             d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                           />
                         </svg>
-                        <div className="text-xs">Width: {content.dimensions.width}px</div>
-                        <div className="text-xs">Height: {content.dimensions.height}px</div>
+                        <div className="text-sm">Width: {content.dimensions.width}px</div>
+                        <div className="text-sm">Height: {content.dimensions.height}px</div>
+                        
+                        {/* Title overlay at bottom */}
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                          <h3 className="text-white font-medium">{content.title}</h3>
+                        </div>
                       </div>
                     )}
                   </div>
