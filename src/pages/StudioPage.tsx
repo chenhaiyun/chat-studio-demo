@@ -40,8 +40,8 @@ const StudioPage = () => {
       title: "Cat in New York",
       color: "#FFCC99",
       dimensions: {
-        width: 600,
-        height: 400
+        width: 640,
+        height: 480
       }
     },
     {
@@ -50,8 +50,8 @@ const StudioPage = () => {
       title: "Cat in Rome",
       color: "#99CCFF",
       dimensions: {
-        width: 600,
-        height: 400
+        width: 640,
+        height: 480
       }
     },
     {
@@ -60,8 +60,8 @@ const StudioPage = () => {
       title: "Cat at Taj Mahal",
       color: "#CCFF99",
       dimensions: {
-        width: 600,
-        height: 400
+        width: 640,
+        height: 480
       }
     },
   ]);
@@ -142,8 +142,8 @@ const StudioPage = () => {
               title: "Cat in Sydney",
               color: "#FF99CC", // Keeping color for backward compatibility
               dimensions: {
-                width: 600,
-                height: 400
+                width: 640,
+                height: 480
               }
             };
             setGeneratedContent((prev) => [...prev, newContent]);
@@ -156,21 +156,6 @@ const StudioPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
-      {/* Left sidebar with logo */}
-      <div className="fixed top-0 left-0 h-screen w-16 bg-gray-900 flex flex-col items-center py-4">
-        <div className="mb-8">
-          <a href="/" className="text-white">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <circle cx="12" cy="12" r="10" />
-            </svg>
-          </a>
-        </div>
-      </div>
 
       {/* Main content area - using grid layout instead of flex */}
       <div className="ml-16 grid grid-cols-3 w-[calc(100%-4rem)]">

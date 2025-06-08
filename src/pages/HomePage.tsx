@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import ImagePlaceholder from "../components/ImagePlaceholder";
+import ProjectCard from "../components/ProjectCard";
 import type { GeneratedContent } from "../types";
 
 // Alias GeneratedContent as ProjectCard for backward compatibility
@@ -25,8 +25,8 @@ const HomePage = () => {
       type: "image",
       color: "#33FF57",
       dimensions: {
-        width: 800,
-        height: 600
+        width: 640,
+        height: 480
       }
     },
     {
@@ -35,8 +35,8 @@ const HomePage = () => {
       type: "image",
       color: "#3357FF",
       dimensions: {
-        width: 600,
-        height: 800
+        width: 640,
+        height: 480
       }
     },
     {
@@ -45,7 +45,7 @@ const HomePage = () => {
       type: "image",
       color: "#FF33A8",
       dimensions: {
-        width: 720,
+        width: 640,
         height: 480
       }
     },
@@ -55,8 +55,8 @@ const HomePage = () => {
       type: "video",
       color: "#33A8FF",
       dimensions: {
-        width: 1280,
-        height: 720
+        width: 640,
+        height: 480
       }
     },
   ]);
@@ -132,31 +132,23 @@ const HomePage = () => {
           </form>
 
           <div>
-            <h2 className="text-2xl font-bold mb-6">Created With Chat Studio</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Created With Chat Studio</h2>
+              <Link 
+                to="/projects" 
+                className="text-blue-500 hover:text-blue-700 flex items-center"
+              >
+                View all projects
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </Link>
+            </div>
             <div className="flex overflow-x-auto pb-6 space-x-6">
               {projects.map((project) => (
-                <Link
-                  to={`/studio/${project.id}`}
-                  key={project.id}
-                  className="flex-shrink-0 cursor-pointer"
-                >
-                  <div className="w-64 h-80 rounded-lg shadow-lg overflow-hidden">
-                    <div className="w-full h-full relative">
-                      {/* Unsplash image placeholder */}
-                      <ImagePlaceholder 
-                        title={project.title}
-                        width={project.dimensions.width}
-                        height={project.dimensions.height}
-                        seed={parseInt(project.id) + 200}
-                      />
-                      
-                      {/* Title overlay at bottom */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                        <h3 className="text-white font-medium">{project.title}</h3>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                <div key={project.id} className="flex-shrink-0 w-64">
+                  <ProjectCard project={project} />
+                </div>
               ))}
             </div>
           </div>
