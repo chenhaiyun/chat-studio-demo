@@ -1,17 +1,20 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import ProjectCard from "../components/ProjectCard";
 import type { GeneratedContent } from "../types";
+import { useAuth } from "react-oidc-context";
 
 // Alias GeneratedContent as ProjectCard for backward compatibility
 type ProjectCard = GeneratedContent;
 
 const HomePage = () => {
+  const auth = useAuth();
   const [prompt, setPrompt] = useState("");
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [displayName, setDisplayName] = useState("");
   const [projects] = useState<ProjectCard[]>([
     {
       id: "1",
@@ -20,8 +23,8 @@ const HomePage = () => {
       color: "#FF5733",
       dimensions: {
         width: 640,
-        height: 480
-      }
+        height: 480,
+      },
     },
     {
       id: "2",
@@ -30,8 +33,8 @@ const HomePage = () => {
       color: "#33FF57",
       dimensions: {
         width: 640,
-        height: 480
-      }
+        height: 480,
+      },
     },
     {
       id: "3",
@@ -40,8 +43,8 @@ const HomePage = () => {
       color: "#3357FF",
       dimensions: {
         width: 640,
-        height: 480
-      }
+        height: 480,
+      },
     },
     {
       id: "4",
@@ -50,8 +53,8 @@ const HomePage = () => {
       color: "#FF33A8",
       dimensions: {
         width: 640,
-        height: 480
-      }
+        height: 480,
+      },
     },
     {
       id: "5",
@@ -60,8 +63,8 @@ const HomePage = () => {
       color: "#33A8FF",
       dimensions: {
         width: 640,
-        height: 480
-      }
+        height: 480,
+      },
     },
   ]);
 
@@ -74,9 +77,9 @@ const HomePage = () => {
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith("image/")) {
       setSelectedImage(file);
-      
+
       // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -90,7 +93,7 @@ const HomePage = () => {
     setSelectedImage(null);
     setImagePreview(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -103,22 +106,35 @@ const HomePage = () => {
         console.log("With attached image:", selectedImage.name);
       }
       window.location.href = `/studio/${Date.now()}`;
-      
+
       // Reset form
       setPrompt("");
       setSelectedImage(null);
       setImagePreview(null);
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   };
+
+  useEffect(() => {
+    setDisplayName(
+      auth.user?.profile?.email ||
+        auth.user?.profile?.name ||
+        auth.user?.profile?.preferred_username ||
+        auth.user?.profile?.nickname ||
+        auth.user?.profile?.sub ||
+        ""
+    );
+  }, [auth]);
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
       <div className="ml-16 p-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl font-bold mb-4 mt-12">Good Night, User</h1>
+          <h1 className="text-4xl font-bold mb-4 mt-12">
+            Good Night, {displayName}
+          </h1>
           <p className="text-xl text-gray-600 mb-8">
             What are we designing today?
           </p>
@@ -128,29 +144,41 @@ const HomePage = () => {
             {imagePreview && (
               <div className="mb-3 max-w-2xl mx-auto">
                 <div className="relative inline-block">
-                  <img 
-                    src={imagePreview} 
-                    alt="Preview" 
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
                     className="h-20 rounded-lg border border-gray-300"
                   />
-                  <button 
+                  <button
                     type="button"
                     onClick={handleCancelImage}
                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
                 {selectedImage && (
                   <div className="text-xs text-gray-500 mt-1">
-                    {selectedImage.name} ({(selectedImage.size / 1024).toFixed(1)} KB)
+                    {selectedImage.name} (
+                    {(selectedImage.size / 1024).toFixed(1)} KB)
                   </div>
                 )}
               </div>
             )}
-            
+
             {/* Hidden file input */}
             <input
               type="file"
@@ -159,7 +187,7 @@ const HomePage = () => {
               accept="image/*"
               className="hidden"
             />
-            
+
             <div className="relative max-w-2xl mx-auto">
               <input
                 type="text"
@@ -215,13 +243,22 @@ const HomePage = () => {
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">Created With Chat Studio</h2>
-              <Link 
-                to="/projects" 
+              <Link
+                to="/projects"
                 className="text-blue-500 hover:text-blue-700 flex items-center"
               >
                 View all projects
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 ml-1"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </Link>
             </div>
