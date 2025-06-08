@@ -1,42 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import ImagePlaceholder from "../components/ImagePlaceholder";
+import type { GeneratedContent } from "../types";
 
-// Placeholder component with Picsum Photos
-const ImagePlaceholder = ({ 
-  title,
-  width,
-  height,
-  seed
-}: { 
-  title: string;
-  width: number;
-  height: number;
-  seed?: number;
-}) => {
-  // Use Picsum Photos with a seed for consistent images
-  const imageId = seed || Math.floor(Math.random() * 1000);
-  const imageUrl = `https://picsum.photos/id/${imageId}/${width}/${height}`;
-    
-  return (
-    <div className="w-full h-full relative">
-      <img 
-        src={imageUrl} 
-        alt={title}
-        className="w-full h-full object-cover"
-      />
-    </div>
-  );
-};
-
-interface ProjectCard {
-  id: string;
-  title: string;
-  color: string;
-  dimensions: {
-    width: number;
-    height: number;
-  };
-}
+// Alias GeneratedContent as ProjectCard for backward compatibility
+type ProjectCard = GeneratedContent;
 
 const HomePage = () => {
   const [prompt, setPrompt] = useState("");
@@ -44,6 +12,7 @@ const HomePage = () => {
     {
       id: "1",
       title: "Abstract Art",
+      type: "image",
       color: "#FF5733",
       dimensions: {
         width: 640,
@@ -53,6 +22,7 @@ const HomePage = () => {
     {
       id: "2",
       title: "Landscape",
+      type: "image",
       color: "#33FF57",
       dimensions: {
         width: 800,
@@ -62,6 +32,7 @@ const HomePage = () => {
     {
       id: "3",
       title: "Portrait",
+      type: "image",
       color: "#3357FF",
       dimensions: {
         width: 600,
@@ -71,6 +42,7 @@ const HomePage = () => {
     {
       id: "4",
       title: "Animation",
+      type: "image",
       color: "#FF33A8",
       dimensions: {
         width: 720,
@@ -80,6 +52,7 @@ const HomePage = () => {
     {
       id: "5",
       title: "Video",
+      type: "video",
       color: "#33A8FF",
       dimensions: {
         width: 1280,
