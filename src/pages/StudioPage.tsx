@@ -20,26 +20,29 @@ interface GeneratedContent {
   };
 }
 
-// Placeholder component with colored background
-const PlaceholderDiv = ({ 
-  color, 
+// Placeholder component with Picsum Photos
+const ImagePlaceholder = ({ 
   title,
   width,
-  height
+  height,
+  seed
 }: { 
-  color: string; 
   title: string;
   width: number;
   height: number;
+  seed?: number;
 }) => {
+  // Use Picsum Photos with a seed for consistent images
+  const imageId = seed || Math.floor(Math.random() * 1000);
+  const imageUrl = `https://picsum.photos/id/${imageId}/${width}/${height}`;
+    
   return (
-    <div 
-      className="w-full h-full flex flex-col items-center justify-center text-white"
-      style={{ backgroundColor: color }}
-    >
-      <div className="text-lg font-bold">{title}</div>
-      <div className="text-sm mt-2">Width: {width}px</div>
-      <div className="text-sm">Height: {height}px</div>
+    <div className="w-full h-full relative">
+      <img 
+        src={imageUrl} 
+        alt={title}
+        className="w-full h-full object-cover"
+      />
     </div>
   );
 };
@@ -142,7 +145,7 @@ const StudioPage = () => {
               id: (generatedContent.length + 1).toString(),
               type: "image",
               title: "Cat in Sydney",
-              color: "#FF99CC",
+              color: "#FF99CC", // Keeping color for backward compatibility
               dimensions: {
                 width: 600,
                 height: 400
@@ -193,11 +196,11 @@ const StudioPage = () => {
                   <div className="w-full h-48 relative">
                     {content.type === "image" ? (
                       <div className="w-full h-full">
-                        <PlaceholderDiv 
-                          color={content.color} 
+                        <ImagePlaceholder 
                           title={content.title}
                           width={content.dimensions.width}
                           height={content.dimensions.height}
+                          seed={parseInt(content.id) + 100}
                         />
                         {/* Title overlay at bottom */}
                         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
