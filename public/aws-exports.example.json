@@ -1,0 +1,8 @@
+{
+  "aws_apigateway_endpoint": "",
+  "aws_region": "",
+  "aws_oidc_provider": "",
+  "aws_oidc_client_id": "",
+  "aws_oidc_customer_domain": "",
+  "aws_cloudfront_url": ""
+ }
