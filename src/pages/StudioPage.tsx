@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 // import { useParams } from 'react-router-dom';
 
 interface Message {
@@ -50,6 +50,9 @@ const ImagePlaceholder = ({
 const StudioPage = () => {
   // Using projectId from URL params (commented out to avoid ESLint warning)
   // const { projectId } = useParams<{ projectId: string }>();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -107,6 +110,37 @@ const StudioPage = () => {
     generatedContent[0].id
   );
   const [isThinking, setIsThinking] = useState(false);
+
+  // Function to scroll to bottom of messages
+  const scrollToBottom = () => {
+    if (shouldAutoScroll && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  // Handle scroll events to determine if we should auto-scroll
+  const handleScroll = () => {
+    if (!chatContainerRef.current) return;
+    
+    const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+    // If we're at the bottom (with a small buffer), enable auto-scroll
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 20;
+    setShouldAutoScroll(isAtBottom);
+  };
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isThinking]);
+
+  // Add scroll event listener
+  useEffect(() => {
+    const chatContainer = chatContainerRef.current;
+    if (chatContainer) {
+      chatContainer.addEventListener('scroll', handleScroll);
+      return () => chatContainer.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -265,7 +299,7 @@ const StudioPage = () => {
           </div>
 
           {/* Scrollable message area with flex-1 to take available space */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((msg) => (
               <div key={msg.id}>
                 <div
@@ -277,7 +311,7 @@ const StudioPage = () => {
                     className={`max-w-xs lg:max-w-md rounded-lg p-4 ${
                       msg.sender === "user"
                         ? "bg-blue-500 text-white rounded-br-none"
-                        : "bg-gray-100 text-gray-800 rounded-bl-none"
+                        : "bg-gray-50 text-gray-800 rounded-bl-none"
                     }`}
                   >
                     {msg.sender === "user" ? (
@@ -299,29 +333,82 @@ const StudioPage = () => {
                   </div>
                 </div>
                 
-                {/* AI thinking section displayed full width */}
+                {/* AI thinking section displayed full width - collapsible */}
                 {msg.thinking && (
-                  <div className="w-full mt-2 mb-4">
-                    <div className="p-4 bg-amber-50 rounded-lg text-sm text-gray-700 border-l-4 border-yellow-500">
-                      <div className="flex items-center mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                  <div className="w-full mt-4 mb-6">
+                    <div className="bg-amber-50 rounded-lg text-sm text-gray-700">
+                      {/* Smart Plan header - collapsible */}
+                      <div className="flex items-center justify-between p-4 cursor-pointer">
+                        <div className="flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                          </svg>
+                          <div className="font-medium text-orange-500">
+                            Smart Plan
+                          </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
                         </svg>
-                        <div className="font-medium text-yellow-600">
-                          Smart Plan
+                      </div>
+                      
+                      {/* Smart Plan content */}
+                      <div className="px-4 pb-4">
+                        {/* Tool items */}
+                        <div className="mb-3">
+                          <div className="flex items-center mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-orange-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                              <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-orange-500 font-medium">Outpaint tool</span>
+                          </div>
+                          <div className="ml-6 pl-2 border-l-2 border-orange-200">
+                            {msg.thinking}
+                          </div>
                         </div>
                       </div>
-                      {msg.thinking}
                     </div>
                   </div>
                 )}
               </div>
             ))}
 
+            {/* Task completion indicator */}
+            <div className="w-full py-4">
+              <div className="flex items-center">
+                <div className="h-6 w-6 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs mr-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <span className="font-medium">The current task has been completed</span>
+              </div>
+            </div>
+            
+            {/* Image Analyzer section */}
+            <div className="w-full mb-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between p-4 cursor-pointer">
+                  <div className="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                    </svg>
+                    <div className="font-medium">
+                      Image Analyzer
+                    </div>
+                  </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            
             {isThinking && (
               <div>
                 <div className="flex justify-start">
-                  <div className="max-w-xs lg:max-w-md rounded-lg p-4 bg-gray-100 text-gray-800 rounded-bl-none">
+                  <div className="max-w-xs lg:max-w-md rounded-lg p-4 bg-gray-50 text-gray-800 rounded-bl-none">
                     <div className="flex items-center mb-1">
                       <div className="h-6 w-6 rounded-full bg-gray-800 flex items-center justify-center text-white text-xs">
                         L
@@ -343,6 +430,8 @@ const StudioPage = () => {
                 </div>
               </div>
             )}
+            {/* Invisible element to scroll to */}
+            <div ref={messagesEndRef} />
           </div>
 
           {/* Fixed input area at the bottom */}
