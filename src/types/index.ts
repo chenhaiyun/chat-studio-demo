@@ -4,6 +4,11 @@ export interface Message {
   content: string;
   thinking?: string;
   timestamp: Date;
+  image?: {
+    url: string;
+    name: string;
+    size: number;
+  };
 }
 
 export interface GeneratedContent {

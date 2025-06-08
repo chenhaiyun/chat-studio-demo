@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import type { ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import ProjectCard from "../components/ProjectCard";
 import type { GeneratedContent } from "../types";
@@ -8,6 +9,9 @@ type ProjectCard = GeneratedContent;
 
 const HomePage = () => {
   const [prompt, setPrompt] = useState("");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [projects] = useState<ProjectCard[]>([
     {
       id: "1",
@@ -61,12 +65,52 @@ const HomePage = () => {
     },
   ]);
 
+  const handleImageClick = () => {
+    // Trigger file input click
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedImage(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCancelImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (prompt.trim()) {
+    if (prompt.trim() || selectedImage) {
       // In a real app, this would create a new project and redirect to the studio page
       console.log("Creating project with prompt:", prompt);
+      if (selectedImage) {
+        console.log("With attached image:", selectedImage.name);
+      }
       window.location.href = `/studio/${Date.now()}`;
+      
+      // Reset form
+      setPrompt("");
+      setSelectedImage(null);
+      setImagePreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -80,6 +124,42 @@ const HomePage = () => {
           </p>
 
           <form onSubmit={handleSubmit} className="mb-16">
+            {/* Image preview area */}
+            {imagePreview && (
+              <div className="mb-3 max-w-2xl mx-auto">
+                <div className="relative inline-block">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="h-20 rounded-lg border border-gray-300"
+                  />
+                  <button 
+                    type="button"
+                    onClick={handleCancelImage}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                {selectedImage && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    {selectedImage.name} ({(selectedImage.size / 1024).toFixed(1)} KB)
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              accept="image/*"
+              className="hidden"
+            />
+            
             <div className="relative max-w-2xl mx-auto">
               <input
                 type="text"
@@ -91,6 +171,7 @@ const HomePage = () => {
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex space-x-2">
                 <button
                   type="button"
+                  onClick={handleImageClick}
                   className="text-gray-500 hover:text-gray-700"
                 >
                   <svg
@@ -104,7 +185,7 @@ const HomePage = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
                     />
                   </svg>
                 </button>

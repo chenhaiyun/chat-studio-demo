@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import type { ChangeEvent } from "react";
 import type { Message, GeneratedContent } from "../types";
 import ImagePlaceholder from "../components/ImagePlaceholder";
 import ChatMessage from "../components/chat/ChatMessage";
@@ -14,16 +15,37 @@ const StudioPage = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const [message, setMessage] = useState("");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
       sender: "user",
       content:
         'Please create a series of 8 illustrations titled "A Cat Around the World"',
-      timestamp: new Date(Date.now() - 60000),
+      timestamp: new Date(Date.now() - 120000),
     },
     {
       id: "2",
+      sender: "ai",
+      content:
+        "I'll create a series of 8 illustrations showing a cat visiting famous landmarks around the world. What style would you prefer for these illustrations?",
+      timestamp: new Date(Date.now() - 90000),
+    },
+    {
+      id: "3",
+      sender: "user",
+      content: "I'd like a Japanese watercolor style with fine linework and pastel colors.",
+      timestamp: new Date(Date.now() - 60000),
+      image: {
+        url: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjQ4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiNmZmYwZjUiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjZjBmNWZmIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iNDgwIiBmaWxsPSJ1cmwoI2dyYWQpIiAvPjxwYXRoIGQ9Ik0yMDAgMjUwQzI1MCAxODAgMzAwIDIwMCAzNTAgMjUwQzQwMCAzMDAgNDUwIDI4MCA1MDAgMjUwIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIgLz48Y2lyY2xlIGN4PSIzMDAiIGN5PSIyMDAiIHI9IjUwIiBmaWxsPSIjZmNkNWU1IiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMiIgLz48Y2lyY2xlIGN4PSI0MDAiIGN5PSIyMDAiIHI9IjMwIiBmaWxsPSIjZDVlNWZjIiBzdHJva2U9IiM4ODgiIHN0cm9rZS13aWR0aD0iMiIgLz48dGV4dCB4PSIyMDAiIHk9IjEwMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmaWxsPSIjNjY2Ij5XYXRlcmNvbG9yIFN0eWxlIFJlZmVyZW5jZTwvdGV4dD48L3N2Zz4=",
+        name: "watercolor_style_reference.svg",
+        size: 1024
+      }
+    },
+    {
+      id: "4",
       sender: "ai",
       content:
         "I see you'd like to add a peace dove to the New York illustration. Let me analyze the selected area and create an appropriate inpainting.",
@@ -103,18 +125,59 @@ const StudioPage = () => {
     }
   }, []);
 
+  const handleImageClick = () => {
+    // Trigger file input click
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedImage(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCancelImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim()) {
+    if (message.trim() || selectedImage) {
       // Add user message
       const newUserMessage: Message = {
         id: Date.now().toString(),
         sender: "user",
         content: message,
         timestamp: new Date(),
+        ...(selectedImage && imagePreview ? {
+          image: {
+            url: imagePreview,
+            name: selectedImage.name,
+            size: selectedImage.size
+          }
+        } : {})
       };
       setMessages([...messages, newUserMessage]);
       setMessage("");
+      setSelectedImage(null);
+      setImagePreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
 
       // Simulate AI thinking and response
       setIsThinking(true);
@@ -265,6 +328,41 @@ const StudioPage = () => {
 
           {/* Fixed input area at the bottom */}
           <div className="p-4 border-t border-gray-200 bg-white">
+            {/* Image preview area */}
+            {imagePreview && (
+              <div className="mb-3 relative">
+                <div className="relative inline-block">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="h-20 rounded-lg border border-gray-300"
+                  />
+                  <button 
+                    onClick={handleCancelImage}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                {selectedImage && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    {selectedImage.name} ({(selectedImage.size / 1024).toFixed(1)} KB)
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              accept="image/*"
+              className="hidden"
+            />
+            
             <form onSubmit={handleSendMessage} className="flex items-center">
               <div className="flex-1 relative">
                 <input
@@ -276,6 +374,7 @@ const StudioPage = () => {
                 />
                 <button
                   type="button"
+                  onClick={handleImageClick}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                 >
                   <svg
