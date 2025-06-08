@@ -177,12 +177,12 @@ const StudioPage = () => {
         </div>
       </div>
 
-      {/* Main content area - adjusted to account for fixed chat sidebar */}
-      <div className="flex-1 ml-16 flex">
-        {/* Generated content display area - width adjusted to account for fixed chat sidebar */}
-        <div className="w-2/3 pr-0 bg-gray-200 flex flex-col">
-          <div className="flex-1 overflow-y-auto p-2">
-            <div className="grid grid-cols-4 gap-2">
+      {/* Main content area - using grid layout instead of flex */}
+      <div className="ml-16 grid grid-cols-3 w-[calc(100%-4rem)]">
+        {/* Generated content display area - using 2 columns of the 3-column grid */}
+        <div className="col-span-2 bg-gray-200 flex flex-col">
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="grid grid-cols-4 gap-4">
               {generatedContent.map((content) => (
                 <div
                   key={content.id}
@@ -193,7 +193,7 @@ const StudioPage = () => {
                   }`}
                   onClick={() => setSelectedContent(content.id)}
                 >
-                  <div className="w-full h-48 relative">
+                  <div className="w-full h-64 relative">
                     {content.type === "image" ? (
                       <div className="w-full h-full">
                         <ImagePlaceholder 
@@ -247,8 +247,8 @@ const StudioPage = () => {
           </div>
         </div>
 
-        {/* Chat area - fixed height equal to screen height */}
-        <div className="w-1/3 bg-white border-l border-gray-200 flex flex-col h-screen fixed right-0">
+        {/* Chat area - taking up 1 column of the 3-column grid */}
+        <div className="bg-white border-l border-gray-200 flex flex-col h-screen">
           <div className="p-4 border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center">
               <div className="h-8 w-8 rounded-full bg-gray-800 flex items-center justify-center text-white">
